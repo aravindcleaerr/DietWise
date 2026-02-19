@@ -5,8 +5,9 @@
 // ============================================================================
 
 import type { FoodItem } from "./types";
+import { REGIONAL_FOOD_DATABASE } from "./food-database-regional";
 
-export const FOOD_DATABASE: FoodItem[] = [
+const BASE_FOOD_DATABASE: FoodItem[] = [
   // =========================================================================
   // BREADS / ROTIS
   // =========================================================================
@@ -1336,6 +1337,9 @@ export const FOOD_DATABASE: FoodItem[] = [
   },
 ];
 
+// Combine base and regional databases
+export const FOOD_DATABASE: FoodItem[] = [...BASE_FOOD_DATABASE, ...REGIONAL_FOOD_DATABASE];
+
 // ============================================================================
 // Search function with fuzzy matching
 // ============================================================================
@@ -1347,7 +1351,7 @@ export const FOOD_DATABASE: FoodItem[] = [
  * @param query - The search string
  * @returns Matching FoodItem array, sorted by relevance
  */
-export function searchFoods(query: string): FoodItem[] {
+export function searchFoods(query: string, customFoods: FoodItem[] = []): FoodItem[] {
   if (!query || query.trim().length === 0) {
     return [];
   }
@@ -1355,10 +1359,12 @@ export function searchFoods(query: string): FoodItem[] {
   const normalizedQuery = query.toLowerCase().trim();
   const queryWords = normalizedQuery.split(/\s+/);
 
+  const allFoods = [...FOOD_DATABASE, ...customFoods];
+
   // Score each food item for relevance
   const scoredResults: { food: FoodItem; score: number }[] = [];
 
-  for (const food of FOOD_DATABASE) {
+  for (const food of allFoods) {
     const nameLower = food.name.toLowerCase();
     const hindiLower = (food.nameHindi || "").toLowerCase();
     const categoryLower = food.category.toLowerCase();
@@ -1441,6 +1447,7 @@ export function getFoodsByCategory(
 /**
  * Get a single food item by its ID.
  */
-export function getFoodById(id: string): FoodItem | undefined {
-  return FOOD_DATABASE.find((food) => food.id === id);
+export function getFoodById(id: string, customFoods: FoodItem[] = []): FoodItem | undefined {
+  return FOOD_DATABASE.find((food) => food.id === id)
+    ?? customFoods.find((food) => food.id === id);
 }

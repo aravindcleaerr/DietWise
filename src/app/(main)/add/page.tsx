@@ -18,7 +18,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Search, Star, Clock, ArrowLeft, Plus, Minus } from "lucide-react";
+import { Search, Star, Clock, ArrowLeft, Plus, Minus, PlusCircle, Camera } from "lucide-react";
+import Link from "next/link";
+import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
@@ -32,30 +34,72 @@ function AddFoodContent() {
   const recentFoodIds = useStore((s) => s.recentFoodIds);
   const toggleFavorite = useStore((s) => s.toggleFavorite);
   const updateStreak = useStore((s) => s.updateStreak);
+  const customFoods = useStore((s) => s.customFoods);
+  const addCustomFood = useStore((s) => s.addCustomFood);
 
   const mealParam = searchParams.get("meal") as MealType | null;
   const dateParam = searchParams.get("date") || selectedDate;
 
   const [mealType, setMealType] = useState<MealType>(mealParam || "lunch");
   const [query, setQuery] = useState("");
-  const [tab, setTab] = useState<"all" | "recent" | "favorites">("all");
+  const [tab, setTab] = useState<"all" | "recent" | "favorites" | "custom">("all");
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [servings, setServings] = useState(1);
+  const [showCustomForm, setShowCustomForm] = useState(false);
+  const [customForm, setCustomForm] = useState({
+    name: "", nameHindi: "", category: "other" as FoodItem["category"],
+    servingSize: 100, servingUnit: "g",
+    calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0,
+  });
+
+  const allFoods = useMemo(() => [...FOOD_DATABASE, ...customFoods], [customFoods]);
 
   const results = useMemo(() => {
     if (tab === "favorites") {
-      return FOOD_DATABASE.filter((f) => favoriteFoodIds.includes(f.id));
+      return allFoods.filter((f) => favoriteFoodIds.includes(f.id));
     }
     if (tab === "recent") {
       return recentFoodIds
-        .map((id) => FOOD_DATABASE.find((f) => f.id === id))
+        .map((id) => allFoods.find((f) => f.id === id))
         .filter(Boolean) as FoodItem[];
     }
-    if (query.trim()) {
-      return searchFoods(query);
+    if (tab === "custom") {
+      return customFoods;
     }
-    return FOOD_DATABASE.slice(0, 30);
-  }, [query, tab, favoriteFoodIds, recentFoodIds]);
+    if (query.trim()) {
+      return searchFoods(query, customFoods);
+    }
+    return allFoods.slice(0, 30);
+  }, [query, tab, favoriteFoodIds, recentFoodIds, allFoods, customFoods]);
+
+  const handleCreateCustomFood = () => {
+    if (!customForm.name.trim()) {
+      toast.error("Food name is required");
+      return;
+    }
+    const newFood: FoodItem = {
+      id: `custom_${generateId()}`,
+      name: customForm.name,
+      nameHindi: customForm.nameHindi || undefined,
+      category: customForm.category,
+      servingSize: customForm.servingSize,
+      servingUnit: customForm.servingUnit,
+      nutrition: {
+        calories: customForm.calories,
+        protein: customForm.protein,
+        carbs: customForm.carbs,
+        fat: customForm.fat,
+        fiber: customForm.fiber,
+      },
+      isVegetarian: true,
+      isCustom: true,
+    };
+    addCustomFood(newFood);
+    setShowCustomForm(false);
+    setSelectedFood(newFood);
+    setCustomForm({ name: "", nameHindi: "", category: "other", servingSize: 100, servingUnit: "g", calories: 0, protein: 0, carbs: 0, fat: 0, fiber: 0 });
+    toast.success("Custom food created!");
+  };
 
   const handleAddFood = () => {
     if (!selectedFood) return;
@@ -195,7 +239,12 @@ function AddFoodContent() {
             <Button variant="ghost" size="icon" onClick={() => router.back()}>
               <ArrowLeft className="h-5 w-5" />
             </Button>
-            <h1 className="text-lg font-bold">Add Food</h1>
+            <h1 className="text-lg font-bold flex-1">Add Food</h1>
+            <Link href="/photo-log">
+              <Button variant="outline" size="icon" className="h-9 w-9">
+                <Camera className="h-4 w-4" />
+              </Button>
+            </Link>
           </div>
           <div className="text-xs text-muted-foreground mb-2">
             {format(new Date(dateParam + "T00:00:00"), "EEE, MMM d")} &bull; {MEAL_TYPE_CONFIG[mealType].icon} {MEAL_TYPE_CONFIG[mealType].label}
@@ -215,11 +264,12 @@ function AddFoodContent() {
 
       <main className="mx-auto max-w-lg px-4 py-3">
         {/* Tabs */}
-        <div className="flex gap-2 mb-3">
+        <div className="flex gap-2 mb-3 overflow-x-auto">
           {[
             { key: "all" as const, label: "All Foods" },
             { key: "recent" as const, label: "Recent", icon: Clock },
             { key: "favorites" as const, label: "Favorites", icon: Star },
+            { key: "custom" as const, label: "My Foods", icon: PlusCircle },
           ].map((t) => (
             <button
               key={t.key}
@@ -236,11 +286,74 @@ function AddFoodContent() {
           ))}
         </div>
 
+        {/* Create Custom Food Button */}
+        {(tab === "custom" || (tab === "all" && query.trim() && results.length === 0)) && !showCustomForm && (
+          <Button
+            variant="outline"
+            className="w-full mb-3 border-dashed"
+            onClick={() => { setShowCustomForm(true); if (query.trim()) setCustomForm((f) => ({ ...f, name: query })); }}
+          >
+            <PlusCircle className="h-4 w-4 mr-2" />
+            Create Custom Food
+          </Button>
+        )}
+
+        {/* Custom Food Form */}
+        {showCustomForm && (
+          <Card className="mb-3">
+            <CardContent className="pt-4 space-y-3">
+              <h3 className="font-semibold text-sm">New Custom Food</h3>
+              <div>
+                <Label className="text-xs">Food Name *</Label>
+                <Input value={customForm.name} onChange={(e) => setCustomForm((f) => ({ ...f, name: e.target.value }))} className="mt-1 h-10" placeholder="e.g. Mom's Special Dal" />
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Serving Size</Label>
+                  <Input type="number" value={customForm.servingSize} onChange={(e) => setCustomForm((f) => ({ ...f, servingSize: Number(e.target.value) || 0 }))} className="mt-1 h-10" />
+                </div>
+                <div>
+                  <Label className="text-xs">Unit</Label>
+                  <Input value={customForm.servingUnit} onChange={(e) => setCustomForm((f) => ({ ...f, servingUnit: e.target.value }))} className="mt-1 h-10" placeholder="g / ml / piece" />
+                </div>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label className="text-xs">Calories *</Label>
+                  <Input type="number" value={customForm.calories || ""} onChange={(e) => setCustomForm((f) => ({ ...f, calories: Number(e.target.value) || 0 }))} className="mt-1 h-10" />
+                </div>
+                <div>
+                  <Label className="text-xs">Protein (g)</Label>
+                  <Input type="number" value={customForm.protein || ""} onChange={(e) => setCustomForm((f) => ({ ...f, protein: Number(e.target.value) || 0 }))} className="mt-1 h-10" />
+                </div>
+                <div>
+                  <Label className="text-xs">Carbs (g)</Label>
+                  <Input type="number" value={customForm.carbs || ""} onChange={(e) => setCustomForm((f) => ({ ...f, carbs: Number(e.target.value) || 0 }))} className="mt-1 h-10" />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <div>
+                  <Label className="text-xs">Fat (g)</Label>
+                  <Input type="number" value={customForm.fat || ""} onChange={(e) => setCustomForm((f) => ({ ...f, fat: Number(e.target.value) || 0 }))} className="mt-1 h-10" />
+                </div>
+                <div>
+                  <Label className="text-xs">Fiber (g)</Label>
+                  <Input type="number" value={customForm.fiber || ""} onChange={(e) => setCustomForm((f) => ({ ...f, fiber: Number(e.target.value) || 0 }))} className="mt-1 h-10" />
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button variant="outline" className="flex-1" onClick={() => setShowCustomForm(false)}>Cancel</Button>
+                <Button className="flex-1" onClick={handleCreateCustomFood}>Create Food</Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Results */}
         <div className="space-y-2">
-          {results.length === 0 ? (
+          {results.length === 0 && !showCustomForm ? (
             <div className="text-center py-8 text-muted-foreground">
-              No foods found. Try a different search.
+              {tab === "custom" ? "No custom foods yet. Create one above!" : "No foods found. Try a different search."}
             </div>
           ) : (
             results.map((food) => (
@@ -254,6 +367,9 @@ function AddFoodContent() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-medium truncate">{food.name}</span>
+                        {food.isCustom && (
+                          <Badge variant="secondary" className="text-[10px] px-1.5 py-0">Custom</Badge>
+                        )}
                         {favoriteFoodIds.includes(food.id) && (
                           <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400 flex-shrink-0" />
                         )}
@@ -292,6 +408,11 @@ function AddFoodContent() {
                 { key: "nuts_seeds", label: "Nuts & Seeds" },
                 { key: "snack", label: "Snacks" },
                 { key: "drink", label: "Drinks" },
+                { key: "south_indian", label: "South Indian" },
+                { key: "bengali", label: "Bengali" },
+                { key: "gujarati", label: "Gujarati" },
+                { key: "punjabi", label: "Punjabi" },
+                { key: "rajasthani", label: "Rajasthani" },
               ].map((cat) => (
                 <Badge
                   key={cat.key}

@@ -12,6 +12,9 @@ import type {
   Achievement,
   MealType,
   NutritionInfo,
+  FoodItem,
+  CustomRecipe,
+  FastingSession,
 } from '@/lib/types';
 
 import { calculateDailyTargets, generateId } from '@/lib/calculations';
@@ -143,6 +146,22 @@ interface DietWiseStore {
   // Recent foods (last 20)
   recentFoodIds: string[];
   addToRecent: (foodId: string) => void;
+
+  // Custom foods
+  customFoods: FoodItem[];
+  addCustomFood: (food: FoodItem) => void;
+  removeCustomFood: (foodId: string) => void;
+
+  // Recipes
+  recipes: CustomRecipe[];
+  addRecipe: (recipe: CustomRecipe) => void;
+  removeRecipe: (recipeId: string) => void;
+
+  // Fasting
+  fastingSessions: FastingSession[];
+  activeFasting: FastingSession | null;
+  startFasting: (session: FastingSession) => void;
+  endFasting: (sessionId: string) => void;
 }
 
 // ---------------------------------------------------------------------------
@@ -386,12 +405,61 @@ export const useStore = create<DietWiseStore>()(
 
       addToRecent: (foodId: string) => {
         set((state) => {
-          // Remove the foodId if it already exists so we can push it to the front.
           const filtered = state.recentFoodIds.filter((id) => id !== foodId);
-          // Newest first, cap at 20.
           const updated = [foodId, ...filtered].slice(0, 20);
           return { recentFoodIds: updated };
         });
+      },
+
+      // ----- Custom Foods ---------------------------------------------------
+      customFoods: [],
+
+      addCustomFood: (food: FoodItem) => {
+        set((state) => ({
+          customFoods: [...state.customFoods, food],
+        }));
+      },
+
+      removeCustomFood: (foodId: string) => {
+        set((state) => ({
+          customFoods: state.customFoods.filter((f) => f.id !== foodId),
+        }));
+      },
+
+      // ----- Recipes --------------------------------------------------------
+      recipes: [],
+
+      addRecipe: (recipe: CustomRecipe) => {
+        set((state) => ({
+          recipes: [...state.recipes, recipe],
+        }));
+      },
+
+      removeRecipe: (recipeId: string) => {
+        set((state) => ({
+          recipes: state.recipes.filter((r) => r.id !== recipeId),
+        }));
+      },
+
+      // ----- Fasting --------------------------------------------------------
+      fastingSessions: [],
+      activeFasting: null,
+
+      startFasting: (session: FastingSession) => {
+        set((state) => ({
+          activeFasting: session,
+          fastingSessions: [...state.fastingSessions, session],
+        }));
+      },
+
+      endFasting: (sessionId: string) => {
+        const now = new Date().toISOString();
+        set((state) => ({
+          activeFasting: null,
+          fastingSessions: state.fastingSessions.map((s) =>
+            s.id === sessionId ? { ...s, isActive: false, actualEndTime: now } : s,
+          ),
+        }));
       },
     }),
     {
@@ -411,6 +479,10 @@ export const useStore = create<DietWiseStore>()(
         lastLoggedDate: state.lastLoggedDate,
         favoriteFoodIds: state.favoriteFoodIds,
         recentFoodIds: state.recentFoodIds,
+        customFoods: state.customFoods,
+        recipes: state.recipes,
+        fastingSessions: state.fastingSessions,
+        activeFasting: state.activeFasting,
       }),
     },
   ),

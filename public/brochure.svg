@@ -1,0 +1,251 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1920" viewBox="0 0 1080 1920">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#1B5E20"/>
+      <stop offset="50%" style="stop-color:#2E7D32"/>
+      <stop offset="100%" style="stop-color:#1B5E20"/>
+    </linearGradient>
+    <linearGradient id="cardGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:rgba(255,255,255,0.15)"/>
+      <stop offset="100%" style="stop-color:rgba(255,255,255,0.05)"/>
+    </linearGradient>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#66BB6A"/>
+      <stop offset="100%" style="stop-color:#43A047"/>
+    </linearGradient>
+    <linearGradient id="orangeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#FF8F00"/>
+      <stop offset="100%" style="stop-color:#FF6D00"/>
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="4" stdDeviation="8" flood-opacity="0.3"/>
+    </filter>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1080" height="1920" fill="url(#bgGrad)"/>
+
+  <!-- Decorative circles -->
+  <circle cx="900" cy="200" r="300" fill="rgba(255,255,255,0.03)"/>
+  <circle cx="100" cy="1700" r="250" fill="rgba(255,255,255,0.03)"/>
+  <circle cx="540" cy="960" r="500" fill="rgba(255,255,255,0.02)"/>
+
+  <!-- Decorative dots pattern -->
+  <g opacity="0.08">
+    <circle cx="50" cy="400" r="3" fill="white"/>
+    <circle cx="150" cy="350" r="2" fill="white"/>
+    <circle cx="250" cy="420" r="3" fill="white"/>
+    <circle cx="830" cy="300" r="2" fill="white"/>
+    <circle cx="950" cy="380" r="3" fill="white"/>
+    <circle cx="1030" cy="450" r="2" fill="white"/>
+    <circle cx="100" cy="1400" r="3" fill="white"/>
+    <circle cx="980" cy="1500" r="2" fill="white"/>
+    <circle cx="200" cy="1600" r="3" fill="white"/>
+    <circle cx="880" cy="1650" r="2" fill="white"/>
+  </g>
+
+  <!-- ===== TOP SECTION: Logo & Title ===== -->
+
+  <!-- Logo icon -->
+  <g transform="translate(540, 160)">
+    <circle r="70" fill="rgba(255,255,255,0.15)" stroke="rgba(255,255,255,0.3)" stroke-width="2"/>
+    <!-- Leaf icon -->
+    <path d="M-30,-35 Q0,-55 30,-35 Q35,0 20,30 Q0,40 -20,30 Q-35,0 -30,-35 Z" fill="#66BB6A" opacity="0.9"/>
+    <path d="M-20,-25 Q0,-40 20,-25 Q22,0 10,20 Q0,28 -10,20 Q-22,0 -20,-25 Z" fill="#81C784"/>
+    <line x1="0" y1="-20" x2="0" y2="25" stroke="white" stroke-width="2" opacity="0.7"/>
+    <line x1="0" y1="-8" x2="-12" y2="-18" stroke="white" stroke-width="1.5" opacity="0.5"/>
+    <line x1="0" y1="2" x2="12" y2="-8" stroke="white" stroke-width="1.5" opacity="0.5"/>
+    <line x1="0" y1="12" x2="-10" y2="4" stroke="white" stroke-width="1.5" opacity="0.5"/>
+  </g>
+
+  <!-- App name -->
+  <text x="540" y="290" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="72" font-weight="bold" fill="white" letter-spacing="3">DietWise</text>
+
+  <!-- Tagline -->
+  <text x="540" y="340" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="26" fill="rgba(255,255,255,0.8)" letter-spacing="4" font-weight="300">SMART DIET TRACKER</text>
+
+  <!-- Divider line -->
+  <line x1="440" y1="375" x2="640" y2="375" stroke="url(#accentGrad)" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Subtitle -->
+  <text x="540" y="420" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="rgba(255,255,255,0.7)">Your Personal Indian Vegetarian</text>
+  <text x="540" y="455" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" fill="rgba(255,255,255,0.7)">Diet Planner &amp; Health Companion</text>
+
+  <!-- ===== FEATURES SECTION ===== -->
+
+  <!-- Section title -->
+  <text x="540" y="545" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#A5D6A7" letter-spacing="6" font-weight="bold">FEATURES</text>
+
+  <!-- Feature cards - Row 1 -->
+  <!-- Card 1: Calorie Tracking -->
+  <g transform="translate(80, 580)">
+    <rect width="440" height="130" rx="20" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="65" cy="65" r="32" fill="rgba(76,175,80,0.3)"/>
+    <text x="65" y="75" text-anchor="middle" font-size="32">🔥</text>
+    <text x="120" y="50" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="white">Calorie Tracking</text>
+    <text x="120" y="78" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">Track daily intake with visual</text>
+    <text x="120" y="100" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">calorie ring &amp; macro bars</text>
+  </g>
+
+  <!-- Card 2: Indian Food DB -->
+  <g transform="translate(560, 580)">
+    <rect width="440" height="130" rx="20" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="65" cy="65" r="32" fill="rgba(255,152,0,0.3)"/>
+    <text x="65" y="75" text-anchor="middle" font-size="32">🍛</text>
+    <text x="120" y="50" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="white">120+ Indian Foods</text>
+    <text x="120" y="78" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">Dal, roti, sabzi, rice &amp; more</text>
+    <text x="120" y="100" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">with Hindi names &amp; macros</text>
+  </g>
+
+  <!-- Feature cards - Row 2 -->
+  <!-- Card 3: Meal Plans -->
+  <g transform="translate(80, 730)">
+    <rect width="440" height="130" rx="20" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="65" cy="65" r="32" fill="rgba(66,165,245,0.3)"/>
+    <text x="65" y="75" text-anchor="middle" font-size="32">📅</text>
+    <text x="120" y="50" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="white">7-Day Meal Plans</text>
+    <text x="120" y="78" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">Ready-made Indian veg plans</text>
+    <text x="120" y="100" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">~1,410 kcal/day for weight loss</text>
+  </g>
+
+  <!-- Card 4: Exercise Tracker -->
+  <g transform="translate(560, 730)">
+    <rect width="440" height="130" rx="20" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="65" cy="65" r="32" fill="rgba(239,83,80,0.3)"/>
+    <text x="65" y="75" text-anchor="middle" font-size="32">💪</text>
+    <text x="120" y="50" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="white">Exercise Tracker</text>
+    <text x="120" y="78" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">No-gym workouts for 50+</text>
+    <text x="120" y="100" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">12-week progressive plan</text>
+  </g>
+
+  <!-- Feature cards - Row 3 -->
+  <!-- Card 5: Water Tracking -->
+  <g transform="translate(80, 880)">
+    <rect width="440" height="130" rx="20" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="65" cy="65" r="32" fill="rgba(66,165,245,0.3)"/>
+    <text x="65" y="75" text-anchor="middle" font-size="32">💧</text>
+    <text x="120" y="50" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="white">Water &amp; Hydration</text>
+    <text x="120" y="78" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">Track glasses with tap-to-add</text>
+    <text x="120" y="100" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">Smart hydration reminders</text>
+  </g>
+
+  <!-- Card 6: Progress -->
+  <g transform="translate(560, 880)">
+    <rect width="440" height="130" rx="20" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+    <circle cx="65" cy="65" r="32" fill="rgba(255,215,0,0.3)"/>
+    <text x="65" y="75" text-anchor="middle" font-size="32">📈</text>
+    <text x="120" y="50" font-family="Arial,Helvetica,sans-serif" font-size="22" font-weight="bold" fill="white">Progress &amp; Badges</text>
+    <text x="120" y="78" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">Weight charts, streaks &amp;</text>
+    <text x="120" y="100" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.7)">8 achievement badges to earn</text>
+  </g>
+
+  <!-- ===== HIGHLIGHTS SECTION ===== -->
+
+  <!-- Highlight banner -->
+  <g transform="translate(80, 1060)">
+    <rect width="920" height="180" rx="24" fill="rgba(0,0,0,0.2)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+    <!-- Stat 1 -->
+    <g transform="translate(115, 50)">
+      <text x="0" y="0" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="bold" fill="#66BB6A">120+</text>
+      <text x="0" y="30" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.6)">Indian Foods</text>
+    </g>
+
+    <!-- Divider -->
+    <line x1="230" y1="25" x2="230" y2="115" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- Stat 2 -->
+    <g transform="translate(345, 50)">
+      <text x="0" y="0" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="bold" fill="#FFA726">7</text>
+      <text x="0" y="30" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.6)">Meal Types</text>
+    </g>
+
+    <!-- Divider -->
+    <line x1="460" y1="25" x2="460" y2="115" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- Stat 3 -->
+    <g transform="translate(575, 50)">
+      <text x="0" y="0" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="bold" fill="#42A5F5">26</text>
+      <text x="0" y="30" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.6)">Exercises</text>
+    </g>
+
+    <!-- Divider -->
+    <line x1="690" y1="25" x2="690" y2="115" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+    <!-- Stat 4 -->
+    <g transform="translate(805, 50)">
+      <text x="0" y="0" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="48" font-weight="bold" fill="#EF5350">100%</text>
+      <text x="0" y="30" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="16" fill="rgba(255,255,255,0.6)">Free &amp; Private</text>
+    </g>
+
+    <!-- Bottom note -->
+    <text x="460" y="155" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.4)">All data stays on your device. No login required.</text>
+  </g>
+
+  <!-- ===== DESIGNED FOR SECTION ===== -->
+
+  <text x="540" y="1320" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="20" fill="#A5D6A7" letter-spacing="6" font-weight="bold">DESIGNED FOR</text>
+
+  <g transform="translate(80, 1345)">
+    <rect width="920" height="200" rx="24" fill="url(#cardGrad)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+
+    <!-- Icons row -->
+    <g transform="translate(80, 45)">
+      <text x="0" y="0" font-size="40">🥗</text>
+      <text x="15" y="50" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Vegetarian</text>
+    </g>
+    <g transform="translate(230, 45)">
+      <text x="0" y="0" font-size="40">🇮🇳</text>
+      <text x="15" y="50" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Indian Diet</text>
+    </g>
+    <g transform="translate(380, 45)">
+      <text x="0" y="0" font-size="40">⚖️</text>
+      <text x="15" y="50" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Weight Loss</text>
+    </g>
+    <g transform="translate(530, 45)">
+      <text x="0" y="0" font-size="40">🏠</text>
+      <text x="15" y="50" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">No Gym</text>
+    </g>
+    <g transform="translate(680, 45)">
+      <text x="0" y="0" font-size="40">📱</text>
+      <text x="15" y="50" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Mobile PWA</text>
+    </g>
+    <g transform="translate(800, 45)">
+      <text x="0" y="0" font-size="40">🌙</text>
+      <text x="15" y="50" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.7)">Dark Mode</text>
+    </g>
+
+    <!-- Description -->
+    <text x="460" y="140" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="rgba(255,255,255,0.6)">Scientifically designed calorie targets using Mifflin-St Jeor equation</text>
+    <text x="460" y="168" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="rgba(255,255,255,0.6)">with Asian BMI cutoffs for accurate health assessment</text>
+  </g>
+
+  <!-- ===== CTA SECTION ===== -->
+
+  <!-- CTA Button -->
+  <g transform="translate(540, 1640)" filter="url(#shadow)">
+    <rect x="-220" y="-35" width="440" height="70" rx="35" fill="url(#orangeGrad)"/>
+    <text x="0" y="8" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="24" font-weight="bold" fill="white" letter-spacing="1">START YOUR JOURNEY</text>
+  </g>
+
+  <!-- URL -->
+  <g transform="translate(540, 1720)">
+    <rect x="-250" y="-22" width="500" height="44" rx="22" fill="rgba(255,255,255,0.1)" stroke="rgba(255,255,255,0.2)" stroke-width="1"/>
+    <text x="0" y="7" text-anchor="middle" font-family="monospace" font-size="22" fill="white" letter-spacing="1">dietwise-guide.vercel.app</text>
+  </g>
+
+  <!-- Bottom tagline -->
+  <text x="540" y="1800" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="18" fill="rgba(255,255,255,0.4)">Free to use. No sign-up needed. Works offline.</text>
+
+  <!-- Footer line -->
+  <line x1="340" y1="1840" x2="740" y2="1840" stroke="rgba(255,255,255,0.1)" stroke-width="1"/>
+
+  <text x="540" y="1875" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="14" fill="rgba(255,255,255,0.25)">Built with care for healthier living</text>
+</svg>

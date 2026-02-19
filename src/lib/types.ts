@@ -16,34 +16,69 @@ export interface UserProfile {
   isOnboarded: boolean;
 }
 
+export interface MicronutrientInfo {
+  vitaminB12Mcg?: number;
+  ironMg?: number;
+  calciumMg?: number;
+  vitaminDIU?: number;
+  omega3g?: number;
+}
+
 export interface NutritionInfo {
   calories: number;
   protein: number;
   carbs: number;
   fat: number;
   fiber: number;
+  micronutrients?: MicronutrientInfo;
 }
 
 export interface FoodItem {
   id: string;
   name: string;
   nameHindi?: string;
-  category:
-    | "bread"
-    | "rice"
-    | "dal"
-    | "sabzi"
-    | "breakfast"
-    | "dairy"
-    | "fruit"
-    | "nuts_seeds"
-    | "snack"
-    | "drink"
-    | "other";
+  category: FoodCategory;
   servingSize: number;
   servingUnit: string;
   nutrition: NutritionInfo;
   isVegetarian: boolean;
+  isCustom?: boolean;
+}
+
+export type FoodCategory =
+  | "bread"
+  | "rice"
+  | "dal"
+  | "sabzi"
+  | "breakfast"
+  | "dairy"
+  | "fruit"
+  | "nuts_seeds"
+  | "snack"
+  | "drink"
+  | "south_indian"
+  | "bengali"
+  | "gujarati"
+  | "punjabi"
+  | "rajasthani"
+  | "other";
+
+export interface CustomRecipe {
+  id: string;
+  name: string;
+  ingredients: { foodId: string; foodName: string; servings: number; nutrition: NutritionInfo }[];
+  totalNutrition: NutritionInfo;
+  servings: number;
+  createdAt: string;
+}
+
+export interface FastingSession {
+  id: string;
+  protocol: "16:8" | "18:6" | "20:4" | "5:2" | "custom";
+  startTime: string; // ISO string
+  endTime: string;   // ISO string (planned end)
+  actualEndTime?: string; // ISO string (actual end)
+  isActive: boolean;
 }
 
 export interface LoggedFood {

@@ -31,6 +31,8 @@ import {
   Bell,
   BellOff,
   Download,
+  Upload,
+  HardDrive,
 } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import type { UserProfile } from "@/lib/types";
@@ -49,6 +51,7 @@ import {
   exportWeightHistory,
   exportExerciseLogs,
 } from "@/lib/export";
+import { exportFullBackup, parseBackupFile, applyBackup } from "@/lib/backup";
 
 export default function ProfilePage() {
   const profile = useStore((s) => s.profile);
@@ -435,6 +438,63 @@ export default function ProfilePage() {
                 Exercise Logs
               </Button>
             </div>
+          </CardContent>
+        </Card>
+
+        {/* Backup & Restore */}
+        <Card>
+          <CardHeader className="pb-2">
+            <CardTitle className="text-base flex items-center gap-2">
+              <HardDrive className="h-4 w-4" />
+              Backup &amp; Restore
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-2">
+            <Button
+              variant="outline"
+              className="w-full"
+              size="sm"
+              onClick={() => {
+                exportFullBackup();
+                toast.success("Backup downloaded!");
+              }}
+            >
+              <Download className="h-4 w-4 mr-2" />
+              Download Full Backup (JSON)
+            </Button>
+            <div>
+              <input
+                type="file"
+                accept=".json"
+                id="backup-file"
+                className="hidden"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const result = await parseBackupFile(file);
+                  if (result.success) {
+                    if (confirm("This will replace ALL your current data. Continue?")) {
+                      applyBackup(result.state);
+                    }
+                  } else {
+                    toast.error(result.error);
+                  }
+                  e.target.value = "";
+                }}
+              />
+              <Button
+                variant="outline"
+                className="w-full"
+                size="sm"
+                onClick={() => document.getElementById("backup-file")?.click()}
+              >
+                <Upload className="h-4 w-4 mr-2" />
+                Restore from Backup
+              </Button>
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Backup saves all your data as a JSON file. Use it to transfer data between devices.
+            </p>
           </CardContent>
         </Card>
 
