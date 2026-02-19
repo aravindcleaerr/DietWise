@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { calculateBMI, getBMICategory } from "@/lib/calculations";
 import { useState, useMemo } from "react";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { toast } from "sonner";
 import {
   LineChart,
@@ -20,6 +20,7 @@ import {
   Tooltip,
   ResponsiveContainer,
   ReferenceLine,
+  Legend,
 } from "recharts";
 import { Scale, Trophy, Flame, Target, TrendingDown } from "lucide-react";
 
@@ -41,8 +42,10 @@ export default function ProgressPage() {
   const currentStreak = useStore((s) => s.currentStreak);
   const longestStreak = useStore((s) => s.longestStreak);
   const dailyLogs = useStore((s) => s.dailyLogs);
+  const dailyTargets = useStore((s) => s.dailyTargets);
 
   const [newWeight, setNewWeight] = useState("");
+  const [range, setRange] = useState(7);
 
   // Compute achievement statuses from real data
   const achievementStatus = useMemo(() => {
@@ -116,6 +119,51 @@ export default function ProgressPage() {
     weight: w.weightKg,
   }));
 
+  const nutritionData = useMemo(() => {
+    const days = [];
+    for (let i = range - 1; i >= 0; i--) {
+      const d = subDays(new Date(), i);
+      const dateStr = format(d, "yyyy-MM-dd");
+      const log = dailyLogs[dateStr];
+      days.push({
+        date: format(d, "MMM d"),
+        calories: log ? Math.round(log.totalNutrition.calories) : 0,
+        protein: log ? Math.round(log.totalNutrition.protein) : 0,
+        carbs: log ? Math.round(log.totalNutrition.carbs) : 0,
+        fat: log ? Math.round(log.totalNutrition.fat) : 0,
+      });
+    }
+    return days;
+  }, [range, dailyLogs]);
+
+  const nutritionSummary = useMemo(() => {
+    const daysWithData = nutritionData.filter((d) => d.calories > 0);
+    const count = daysWithData.length || 1;
+    const avgCalories = Math.round(
+      daysWithData.reduce((s, d) => s + d.calories, 0) / count
+    );
+    const avgProtein = Math.round(
+      daysWithData.reduce((s, d) => s + d.protein, 0) / count
+    );
+    const avgCarbs = Math.round(
+      daysWithData.reduce((s, d) => s + d.carbs, 0) / count
+    );
+    const avgFat = Math.round(
+      daysWithData.reduce((s, d) => s + d.fat, 0) / count
+    );
+    const daysOnTarget = daysWithData.filter(
+      (d) =>
+        Math.abs(d.calories - dailyTargets.calories) <=
+        dailyTargets.calories * 0.1
+    ).length;
+    const adherence =
+      daysWithData.length > 0
+        ? Math.round((daysOnTarget / daysWithData.length) * 100)
+        : 0;
+
+    return { avgCalories, avgProtein, avgCarbs, avgFat, daysOnTarget, adherence, totalDaysWithData: daysWithData.length };
+  }, [nutritionData, dailyTargets]);
+
   return (
     <div>
       <PageHeader title="Progress" subtitle="Track your journey" />
@@ -124,6 +172,7 @@ export default function ProgressPage() {
         <Tabs defaultValue="weight">
           <TabsList className="w-full">
             <TabsTrigger value="weight" className="flex-1">Weight</TabsTrigger>
+            <TabsTrigger value="nutrition" className="flex-1">Nutrition</TabsTrigger>
             <TabsTrigger value="streaks" className="flex-1">Streaks</TabsTrigger>
             <TabsTrigger value="achievements" className="flex-1">Badges</TabsTrigger>
           </TabsList>
@@ -245,6 +294,178 @@ export default function ProgressPage() {
                 </CardContent>
               </Card>
             )}
+          </TabsContent>
+
+          {/* Nutrition Tab */}
+          <TabsContent value="nutrition" className="space-y-4 mt-4">
+            {/* Time Range Selector */}
+            <div className="flex gap-2">
+              {[7, 14, 30].map((d) => (
+                <Button
+                  key={d}
+                  variant={range === d ? "default" : "outline"}
+                  size="sm"
+                  className="flex-1"
+                  onClick={() => setRange(d)}
+                >
+                  {d} days
+                </Button>
+              ))}
+            </div>
+
+            {/* Daily Calories Chart */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Daily Calories</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={nutritionData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 11 }}
+                      stroke="hsl(var(--muted-foreground))"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11 }}
+                      stroke="hsl(var(--muted-foreground))"
+                    />
+                    <Tooltip />
+                    <ReferenceLine
+                      y={dailyTargets.calories}
+                      stroke="#43A047"
+                      strokeDasharray="5 5"
+                      label={{ value: "Target", position: "right", fontSize: 11 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="calories"
+                      stroke="#43A047"
+                      strokeWidth={2}
+                      dot={{ fill: "#43A047", r: 3 }}
+                      activeDot={{ r: 5 }}
+                      name="Calories"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Macros Trend Chart */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">Macros Trend</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <ResponsiveContainer width="100%" height={220}>
+                  <LineChart data={nutritionData}>
+                    <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                    <XAxis
+                      dataKey="date"
+                      tick={{ fontSize: 11 }}
+                      stroke="hsl(var(--muted-foreground))"
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11 }}
+                      stroke="hsl(var(--muted-foreground))"
+                      unit="g"
+                    />
+                    <Tooltip />
+                    <Legend />
+                    <ReferenceLine
+                      y={dailyTargets.protein}
+                      stroke="#5C6BC0"
+                      strokeDasharray="4 4"
+                    />
+                    <ReferenceLine
+                      y={dailyTargets.carbs}
+                      stroke="#FFA726"
+                      strokeDasharray="4 4"
+                    />
+                    <ReferenceLine
+                      y={dailyTargets.fat}
+                      stroke="#EF5350"
+                      strokeDasharray="4 4"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="protein"
+                      stroke="#5C6BC0"
+                      strokeWidth={2}
+                      dot={{ fill: "#5C6BC0", r: 3 }}
+                      activeDot={{ r: 5 }}
+                      name="Protein"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="carbs"
+                      stroke="#FFA726"
+                      strokeWidth={2}
+                      dot={{ fill: "#FFA726", r: 3 }}
+                      activeDot={{ r: 5 }}
+                      name="Carbs"
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="fat"
+                      stroke="#EF5350"
+                      strokeWidth={2}
+                      dot={{ fill: "#EF5350", r: 3 }}
+                      activeDot={{ r: 5 }}
+                      name="Fat"
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            {/* Summary Stats Card */}
+            <Card>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base">
+                  Summary ({range}-day average)
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="rounded-lg bg-muted/50 p-3 text-center">
+                    <div className="text-2xl font-bold">{nutritionSummary.avgCalories}</div>
+                    <div className="text-xs text-muted-foreground">Avg Calories</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/50 p-3 text-center">
+                    <div className="text-2xl font-bold" style={{ color: "#5C6BC0" }}>
+                      {nutritionSummary.avgProtein}g
+                    </div>
+                    <div className="text-xs text-muted-foreground">Avg Protein</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/50 p-3 text-center">
+                    <div className="text-2xl font-bold" style={{ color: "#FFA726" }}>
+                      {nutritionSummary.avgCarbs}g
+                    </div>
+                    <div className="text-xs text-muted-foreground">Avg Carbs</div>
+                  </div>
+                  <div className="rounded-lg bg-muted/50 p-3 text-center">
+                    <div className="text-2xl font-bold" style={{ color: "#EF5350" }}>
+                      {nutritionSummary.avgFat}g
+                    </div>
+                    <div className="text-xs text-muted-foreground">Avg Fat</div>
+                  </div>
+                </div>
+                <div className="mt-4 space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Days on target (within 10%)</span>
+                    <span className="font-semibold">
+                      {nutritionSummary.daysOnTarget} of {nutritionSummary.totalDaysWithData}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Adherence</span>
+                    <span className="font-semibold">{nutritionSummary.adherence}%</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
 
           {/* Streaks Tab */}

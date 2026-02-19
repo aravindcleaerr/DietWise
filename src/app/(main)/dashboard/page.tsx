@@ -11,7 +11,7 @@ import { MealSummaryCard } from "@/components/dashboard/MealSummaryCard";
 import { WeightSparkline } from "@/components/dashboard/WeightSparkline";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { CalendarDays, Dumbbell, AlertTriangle, Share2 } from "lucide-react";
+import { CalendarDays, Dumbbell, AlertTriangle, Share2, Lightbulb } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   calculateDailyMicronutrients,
@@ -34,6 +34,7 @@ export default function DashboardPage() {
   const currentStreak = useStore((s) => s.currentStreak);
   const longestStreak = useStore((s) => s.longestStreak);
   const weightHistory = useStore((s) => s.weightHistory);
+  const exerciseLogs = useStore((s) => s.exerciseLogs);
 
   const activeFasting = useStore((s) => s.activeFasting);
   const log = getDailyLog(selectedDate);
@@ -41,6 +42,18 @@ export default function DashboardPage() {
 
   const microTotals = calculateDailyMicronutrients(log);
   const microAlerts = getMicronutrientAlerts(microTotals);
+
+  // Exercise calories integration
+  const todayExercises = exerciseLogs[selectedDate] ?? [];
+  const exerciseCalsBurned = todayExercises.reduce((s, e) => s + e.caloriesBurned, 0);
+  const consumedCalories = Math.round(log.totalNutrition.calories);
+  const netCalories = consumedCalories - exerciseCalsBurned;
+  const remainingCalories = dailyTargets.calories - netCalories;
+
+  // Meal suggestions: remaining macros
+  const remainingProtein = dailyTargets.protein - log.totalNutrition.protein;
+  const remainingFiber = dailyTargets.fiber - log.totalNutrition.fiber;
+  const remainingCals = dailyTargets.calories - Math.round(log.totalNutrition.calories);
 
   const handlePrevDate = () => {
     const prev = format(subDays(new Date(selectedDate + "T00:00:00"), 1), "yyyy-MM-dd");
@@ -91,6 +104,53 @@ export default function DashboardPage() {
             color="#EF5350"
           />
         </div>
+
+        {/* Net Calories (exercise integration) */}
+        {(consumedCalories > 0 || exerciseCalsBurned > 0) && (
+          <Card
+            className={`${
+              netCalories < dailyTargets.calories
+                ? "border-green-300 dark:border-green-700"
+                : "border-amber-300 dark:border-amber-700"
+            }`}
+          >
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Dumbbell className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
+                <span className="text-sm font-semibold">Net Calories</span>
+              </div>
+              <div className="flex items-center justify-between text-xs flex-wrap gap-y-1">
+                <span>
+                  <span className="text-muted-foreground">Eaten:</span>{" "}
+                  <span className="font-semibold">{consumedCalories}</span>
+                </span>
+                <span className="text-muted-foreground">-</span>
+                <span>
+                  <span className="text-muted-foreground">Exercise:</span>{" "}
+                  <span className="font-semibold text-orange-600 dark:text-orange-400">{exerciseCalsBurned}</span>
+                </span>
+                <span className="text-muted-foreground">=</span>
+                <span>
+                  <span className="text-muted-foreground">Net:</span>{" "}
+                  <span className="font-bold">{netCalories}</span>
+                </span>
+                <span className="text-muted-foreground">|</span>
+                <span>
+                  <span className="text-muted-foreground">Remaining:</span>{" "}
+                  <span
+                    className={`font-bold ${
+                      remainingCalories >= 0
+                        ? "text-green-600 dark:text-green-400"
+                        : "text-red-600 dark:text-red-400"
+                    }`}
+                  >
+                    {remainingCalories}
+                  </span>
+                </span>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Water & Streak Row */}
         <div className="grid grid-cols-2 gap-3">
@@ -173,6 +233,39 @@ export default function DashboardPage() {
               </div>
             </div>
           </Link>
+          <Link href="/barcode" className="block">
+            <div className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-accent h-full">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-500/10">
+                <span className="text-lg">📊</span>
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Barcode</div>
+                <div className="text-xs text-muted-foreground">Scan & add</div>
+              </div>
+            </div>
+          </Link>
+          <Link href="/reports" className="block">
+            <div className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-accent h-full">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-indigo-500/10">
+                <span className="text-lg">📋</span>
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Reports</div>
+                <div className="text-xs text-muted-foreground">Weekly insights</div>
+              </div>
+            </div>
+          </Link>
+          <Link href="/body-stats" className="block">
+            <div className="flex items-center gap-3 rounded-xl border bg-card p-4 transition-colors hover:bg-accent h-full">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500/10">
+                <span className="text-lg">📐</span>
+              </div>
+              <div>
+                <div className="font-semibold text-sm">Body Stats</div>
+                <div className="text-xs text-muted-foreground">BMI, BMR, TDEE</div>
+              </div>
+            </div>
+          </Link>
         </div>
 
         {/* Micronutrient Alerts */}
@@ -216,6 +309,35 @@ export default function DashboardPage() {
                     </div>
                   );
                 })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Meal Suggestions */}
+        {log.meals.length > 0 && (remainingProtein > 15 || remainingFiber > 10 || (remainingCals >= 200 && remainingCals <= 500)) && (
+          <Card className="border-purple-200 dark:border-purple-800 bg-purple-50/30 dark:bg-purple-950/20">
+            <CardContent className="pt-4 pb-3">
+              <div className="flex items-center gap-2 mb-2">
+                <Lightbulb className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                <span className="text-sm font-semibold text-violet-700 dark:text-violet-400">Meal Suggestions</span>
+              </div>
+              <div className="space-y-1.5">
+                {remainingProtein > 15 && (
+                  <div className="text-xs text-violet-700 dark:text-violet-300">
+                    <span className="font-medium">Need more protein?</span> Try Paneer Bhurji (25g), Moong Dal (8g), or Greek Yogurt (15g)
+                  </div>
+                )}
+                {remainingFiber > 10 && (
+                  <div className="text-xs text-violet-700 dark:text-violet-300">
+                    <span className="font-medium">Boost your fiber</span> with Mixed Salad (4g), Oats (5g), or Guava (5g)
+                  </div>
+                )}
+                {remainingCals >= 200 && remainingCals <= 500 && (
+                  <div className="text-xs text-violet-700 dark:text-violet-300">
+                    <span className="font-medium">Light options:</span> Buttermilk (40 cal), Green Tea (2 cal), or Fruit Bowl (80 cal)
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>

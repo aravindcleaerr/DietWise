@@ -157,6 +157,9 @@ interface DietWiseStore {
   addRecipe: (recipe: CustomRecipe) => void;
   removeRecipe: (recipeId: string) => void;
 
+  // Edit food servings
+  updateFoodServings: (date: string, mealType: MealType, foodId: string, newServings: number) => void;
+
   // Fasting
   fastingSessions: FastingSession[];
   activeFasting: FastingSession | null;
@@ -439,6 +442,40 @@ export const useStore = create<DietWiseStore>()(
         set((state) => ({
           recipes: state.recipes.filter((r) => r.id !== recipeId),
         }));
+      },
+
+      // ----- Edit Food Servings -----------------------------------------------
+      updateFoodServings: (date: string, mealType: MealType, foodId: string, newServings: number) => {
+        set((state) => {
+          const existingLog = state.dailyLogs[date];
+          if (!existingLog) return state;
+
+          const updatedMeals = existingLog.meals.map((meal) => {
+            if (meal.mealType !== mealType) return meal;
+            return {
+              ...meal,
+              foods: meal.foods.map((f) => {
+                if (f.id !== foodId) return f;
+                // Scale nutrition based on ratio of new to old servings
+                const ratio = newServings / f.servings;
+                return {
+                  ...f,
+                  servings: newServings,
+                  nutrition: {
+                    calories: Math.round(f.nutrition.calories * ratio),
+                    protein: Math.round(f.nutrition.protein * ratio * 10) / 10,
+                    carbs: Math.round(f.nutrition.carbs * ratio * 10) / 10,
+                    fat: Math.round(f.nutrition.fat * ratio * 10) / 10,
+                    fiber: Math.round(f.nutrition.fiber * ratio * 10) / 10,
+                  },
+                };
+              }),
+            };
+          });
+
+          const updatedLog = recalculateDailyLog({ ...existingLog, meals: updatedMeals });
+          return { dailyLogs: { ...state.dailyLogs, [date]: updatedLog } };
+        });
       },
 
       // ----- Fasting --------------------------------------------------------

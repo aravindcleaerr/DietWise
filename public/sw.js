@@ -1,5 +1,5 @@
 // DietWise Service Worker - Offline Support
-const CACHE_NAME = "dietwise-v2";
+const CACHE_NAME = "dietwise-v3";
 const STATIC_ASSETS = [
   "/",
   "/dashboard",
@@ -13,6 +13,9 @@ const STATIC_ASSETS = [
   "/recipes",
   "/photo-log",
   "/festival-plans",
+  "/barcode",
+  "/reports",
+  "/body-stats",
   "/onboarding",
   "/manifest.json",
   "/icons/icon-192.png",

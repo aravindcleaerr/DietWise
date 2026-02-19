@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { format, subDays, addDays } from "date-fns";
 import { useStore } from "@/lib/store";
 import { PageHeader } from "@/components/layout/PageHeader";
@@ -7,7 +8,7 @@ import { MEAL_TYPE_CONFIG } from "@/lib/types";
 import type { MealType } from "@/lib/types";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Minus, Pencil, Trash2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 export default function FoodLogPage() {
@@ -17,6 +18,9 @@ export default function FoodLogPage() {
   const getDailyLog = useStore((s) => s.getDailyLog);
   const dailyTargets = useStore((s) => s.dailyTargets);
   const removeFoodFromMeal = useStore((s) => s.removeFoodFromMeal);
+  const updateFoodServings = useStore((s) => s.updateFoodServings);
+
+  const [editingFood, setEditingFood] = useState<{mealType: MealType; foodId: string; servings: number} | null>(null);
 
   const log = getDailyLog(selectedDate);
   const today = format(new Date(), "yyyy-MM-dd");
@@ -103,33 +107,110 @@ export default function FoodLogPage() {
                   {meal && meal.foods.length > 0 ? (
                     <div className="space-y-2">
                       {meal.foods.map((food) => (
-                        <div
-                          key={food.id}
-                          className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0"
-                        >
-                          <div className="flex-1 min-w-0">
-                            <div className="text-sm font-medium truncate">
-                              {food.foodName}
+                        <div key={food.id}>
+                          <div
+                            className="flex items-center justify-between py-1.5 border-b border-border/50 last:border-0"
+                          >
+                            <div className="flex-1 min-w-0">
+                              <div className="text-sm font-medium truncate">
+                                {food.foodName}
+                              </div>
+                              <div className="text-xs text-muted-foreground">
+                                {food.servings} {food.servingUnit} &bull; P:{food.nutrition.protein}g C:{food.nutrition.carbs}g F:{food.nutrition.fat}g
+                              </div>
                             </div>
-                            <div className="text-xs text-muted-foreground">
-                              {food.servings} {food.servingUnit} &bull; P:{food.nutrition.protein}g C:{food.nutrition.carbs}g F:{food.nutrition.fat}g
+                            <div className="flex items-center gap-2 ml-2">
+                              <span className="text-sm font-semibold">
+                                {Math.round(food.nutrition.calories)}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-primary"
+                                onClick={() =>
+                                  setEditingFood({
+                                    mealType,
+                                    foodId: food.id,
+                                    servings: food.servings,
+                                  })
+                                }
+                              >
+                                <Pencil className="h-3.5 w-3.5" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-7 w-7 text-muted-foreground hover:text-destructive"
+                                onClick={() =>
+                                  removeFoodFromMeal(selectedDate, mealType, food.id)
+                                }
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </Button>
                             </div>
                           </div>
-                          <div className="flex items-center gap-2 ml-2">
-                            <span className="text-sm font-semibold">
-                              {Math.round(food.nutrition.calories)}
-                            </span>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-7 w-7 text-muted-foreground hover:text-destructive"
-                              onClick={() =>
-                                removeFoodFromMeal(selectedDate, mealType, food.id)
-                              }
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
+                          {editingFood &&
+                            editingFood.mealType === mealType &&
+                            editingFood.foodId === food.id && (
+                              <div className="flex items-center gap-2 py-2 px-2 bg-muted/50 rounded-md mt-1">
+                                <span className="text-xs text-muted-foreground mr-1">Servings:</span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() =>
+                                    setEditingFood((prev) =>
+                                      prev
+                                        ? { ...prev, servings: Math.max(0.5, prev.servings - 0.5) }
+                                        : null
+                                    )
+                                  }
+                                >
+                                  <Minus className="h-3.5 w-3.5" />
+                                </Button>
+                                <span className="text-sm font-semibold min-w-[2rem] text-center">
+                                  {editingFood.servings}
+                                </span>
+                                <Button
+                                  variant="outline"
+                                  size="icon"
+                                  className="h-7 w-7"
+                                  onClick={() =>
+                                    setEditingFood((prev) =>
+                                      prev
+                                        ? { ...prev, servings: prev.servings + 0.5 }
+                                        : null
+                                    )
+                                  }
+                                >
+                                  <Plus className="h-3.5 w-3.5" />
+                                </Button>
+                                <Button
+                                  variant="default"
+                                  size="sm"
+                                  className="h-7 ml-auto"
+                                  onClick={() => {
+                                    updateFoodServings(
+                                      selectedDate,
+                                      editingFood.mealType,
+                                      editingFood.foodId,
+                                      editingFood.servings
+                                    );
+                                    setEditingFood(null);
+                                  }}
+                                >
+                                  Save
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-7"
+                                  onClick={() => setEditingFood(null)}
+                                >
+                                  Cancel
+                                </Button>
+                              </div>
+                            )}
                         </div>
                       ))}
                     </div>
