@@ -1,0 +1,23 @@
+{
+  "name": "DietWise - Smart Diet Tracker",
+  "short_name": "DietWise",
+  "description": "Personalized vegetarian diet planner, scheduler & tracker",
+  "display": "standalone",
+  "orientation": "portrait",
+  "theme_color": "#2E7D32",
+  "background_color": "#FAFAF8",
+  "start_url": "/dashboard",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
